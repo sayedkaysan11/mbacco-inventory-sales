@@ -15,8 +15,8 @@ Stok berubah otomatis dan konsisten saat transaksi berhasil. Ada dua role: **Adm
 
 ## 3. Installation
 ```bash
-git clone <repository-url>
-cd <nama-folder-repository>
+git clone https://github.com/sayedkaysan11/mbacco-inventory-sales.git
+cd mbacco-inventory-sales
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -166,7 +166,7 @@ Test memakai database SQLite in-memory bawaan `phpunit.xml` Laravel 11/12 (tidak
 | Staff tidak bisa akses fungsi Admin lewat URL | `AuthorizationTest` |
 | Filter & pagination | `SearchTest` |
 
-> Tempel output `php artisan test` dan screenshot halaman di folder `docs/` sebagai bukti pengujian.
+> > Bukti hasil pengujian (`php artisan test`) dan screenshot halaman ada di folder `docs/`.
 
 ## Catatan untuk Code Ownership Interview
 | Pertanyaan | Jawaban singkat & lokasi kode |
