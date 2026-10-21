@@ -3,7 +3,7 @@
 Aplikasi manajemen stok dan penjualan berbasis **Laravel + MySQL** (UTS Web Programming 2 – Integrated Laravel Project).
 
 ## 1. Project Overview
-Sistem untuk toko tembakau **MBACCO** (instagram.com/mbacco.id): mengelola kategori, produk, pemasok, pembelian (stock-in), dan penjualan.
+Sistem untuk toko tembakau **MBACCO** : mengelola kategori, produk, pemasok, pembelian (stock-in), dan penjualan.
 Stok berubah otomatis dan konsisten saat transaksi berhasil. Ada dua role: **Admin/Owner** dan **Staff**.
 
 ## 2. Requirements
