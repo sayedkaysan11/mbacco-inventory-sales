@@ -195,7 +195,7 @@ Test memakai database SQLite in-memory bawaan `phpunit.xml` Laravel 11/12 (tidak
 ```
 app/Models                  8 model + relasi Eloquent
 app/Http/Controllers        Auth, Dashboard, Category, Supplier, Product, Purchase, Sale, User
-app/Http/Requests           ProductRequest, SaleRequest, PurchaseRequest
+app/Http/Controllers        Auth, Dashboard, Category, Supplier, Product, Purchase, Sale, User, Report, StockForecast
 app/Services                SaleService, PurchaseService  (business logic transaksi)
 app/Providers               AppServiceProvider (Gate 'admin', pagination Bootstrap)
 database/migrations         skema + FK + index
