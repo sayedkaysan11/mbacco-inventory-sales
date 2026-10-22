@@ -203,4 +203,20 @@ database/seeders            kategori, produk, pemasok, akun demo
 routes/web.php              named routes + middleware auth / can:admin
 resources/views             layout reusable + halaman Blade
 tests/Feature               test scenario minimum
-```
+```## Screenshot
+
+### Dashboard
+![Dashboard](docs/dashboard.png)
+Ringkasan penjualan, jumlah produk, dan stok rendah. Semua angka dihitung dari database.
+
+### Penjualan ditolak karena stok tidak cukup
+![Stok tidak cukup](docs/stok-tidak-cukup.png)
+Sistem menolak penjualan yang melebihi stok, dan data tidak berubah sama sekali.
+
+### Staff ditolak mengakses halaman admin
+![Staff ditolak 403](docs/staffditolak.png)
+Staff yang membuka halaman admin lewat URL langsung mendapat 403.
+
+### Hasil pengujian
+![Hasil test](docs/hasiltest.png)
+Hasil `php artisan test`: 36 test lulus.
