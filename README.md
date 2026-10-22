@@ -3,29 +3,29 @@
 Aplikasi manajemen stok dan penjualan berbasis **Laravel + MySQL** (UTS Web Programming 2 – Integrated Laravel Project).
 
 ## 1. Project Overview
-Sistem untuk toko tembakau **MBACCO** : mengelola kategori, produk, pemasok, pembelian (stock-in), dan penjualan.
+Sistem untuk toko tembakau **MBACCO** (instagram.com/mbacco.id): mengelola kategori, produk, pemasok, pembelian (stock-in), dan penjualan.
 Stok berubah otomatis dan konsisten saat transaksi berhasil. Ada dua role: **Admin/Owner** dan **Staff**.
 
 ## 2. Requirements
 - PHP >= 8.2 (ekstensi: mbstring, xml, pdo_mysql, ctype, json)
 - Composer 2
 - MySQL / MariaDB
-- Git
-- Node.js/npm **tidak diperlukan**: tampilan memakai Bootstrap 5 via CDN (butuh koneksi internet saat membuka halaman)
+- Laravel 11 atau 12
+- Tidak perlu Node/npm: tampilan memakai Bootstrap 5 via CDN (butuh internet saat membuka halaman)
 
 ## 3. Installation
+Repository ini berisi **lapisan aplikasi** (models, controllers, views, migrations, seeders, tests).
+Pasang di atas project Laravel baru:
+
 ```bash
-git clone https://github.com/sayedkaysan11/mbacco-inventory-sales.git
-cd mbacco-inventory-sales
-composer install
-cp .env.example .env
-php artisan key:generate
+composer create-project laravel/laravel inventory-sales
+cd inventory-sales
+# salin isi folder paket ini ke root project (timpa file bila diminta):
+#   app/  database/  resources/  routes/  tests/  README.md
 ```
-Di Windows (Command Prompt), ganti `cp .env.example .env` dengan `copy .env.example .env`.
 
 ## 4. Environment Setup
-1. Buat database kosong di MySQL, misalnya bernama `inventory_sales`.
-2. Buka file `.env`, lalu atur koneksi database:
+Edit `.env` (file ini jangan di-commit; commit hanya `.env.example`):
 
 ```env
 DB_CONNECTION=mysql
@@ -35,14 +35,14 @@ DB_DATABASE=inventory_sales
 DB_USERNAME=root
 DB_PASSWORD=
 ```
-File `.env` tidak di-commit ke Git. Yang di-commit hanya `.env.example`.
+Buat database kosong `inventory_sales`, lalu pastikan `APP_KEY` terisi (`php artisan key:generate`).
 
 ## 5. Migration & Seeding
 ```bash
 php artisan migrate --seed      # atau: php artisan migrate:fresh --seed
 php artisan serve
 ```
-Buka http://127.0.0.1:8000 lalu login memakai akun demo di bawah.
+Buka http://127.0.0.1:8000
 
 ## 6. Demo Account
 | Role  | Email             | Password      |
@@ -132,6 +132,7 @@ erDiagram
         bigint product_id FK
         int quantity
         decimal unit_price
+        decimal unit_cost
         decimal subtotal }
 ```
 
@@ -139,6 +140,14 @@ erDiagram
 - `hasMany` ada di sisi "satu" (Category → banyak Product); `belongsTo` di sisi "banyak" (Product → satu Category).
 - **Foreign key berada di tabel detail/anak** (`products.category_id`, `sale_items.sale_id`) karena satu baris induk dipakai banyak baris anak; menyimpan banyak id di induk melanggar normalisasi.
 - Daftar produk memakai `Product::with('category')` untuk menghindari N+1 query.
+
+## Fitur tambahan: Laporan Laba & Estimasi Stok
+- **Laporan laba** (`/reports`, khusus admin): omzet, modal, laba kotor, margin, laba per hari, produk paling menguntungkan, filter tanggal, dan ekspor CSV.
+  Laba = subtotal penjualan - (qty x `unit_cost`). Kolom `sale_items.unit_cost` menyimpan harga modal *saat transaksi terjadi*
+  (snapshot), sehingga laporan lama tidak berubah jika harga beli produk diubah kemudian.
+- **Estimasi stok habis** (`/stock-forecast`, admin dan staff): perkiraan hari sampai stok habis = stok / rata-rata terjual per hari (30 hari terakhir),
+  plus saran jumlah beli agar cukup 30 hari. Ini hitungan sederhana, bukan AI. Transaksi yang dibatalkan tidak dihitung.
+- Setelah menyalin file baru ke project yang sudah berjalan, cukup jalankan `php artisan migrate` (tanpa `fresh`) agar data tidak hilang.
 
 ## 8. Known Limitations
 - Penomoran transaksi memakai kode acak unik (bukan urut).
@@ -165,8 +174,10 @@ Test memakai database SQLite in-memory bawaan `phpunit.xml` Laravel 11/12 (tidak
 | Atomicity / rollback jika satu item gagal | `SaleTest::test_failure_on_second_item_rolls_back_everything` |
 | Staff tidak bisa akses fungsi Admin lewat URL | `AuthorizationTest` |
 | Filter & pagination | `SearchTest` |
+| Laporan laba, snapshot modal, filter tanggal, CSV, akses admin | `ReportTest` |
+| Estimasi stok habis dan saran beli | `StockForecastTest` |
 
-> > Bukti hasil pengujian (`php artisan test`) dan screenshot halaman ada di folder `docs/`.
+> Tempel output `php artisan test` dan screenshot halaman di folder `docs/` sebagai bukti pengujian.
 
 ## Catatan untuk Code Ownership Interview
 | Pertanyaan | Jawaban singkat & lokasi kode |

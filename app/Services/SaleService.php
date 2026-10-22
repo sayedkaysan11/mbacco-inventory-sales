@@ -57,6 +57,7 @@ class SaleService
                     'product_id' => $product->id,
                     'quantity' => $qty,
                     'unit_price' => $product->selling_price,
+                    'unit_cost' => $product->purchase_price, // snapshot modal untuk laporan laba
                     'subtotal' => $subtotal,
                 ]);
 

@@ -1,29 +1,34 @@
 @extends('layouts.app')
-@section('title', 'Login')
+@section('title', 'Masuk')
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-5 col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-3">MBACCO – Login</h1>
+<div class="row login-wrap g-4">
+    <div class="col-lg-7 brand-panel">
+        <img class="login-logo" src="{{ asset('images/mbacco-logo.png') }}" alt="MBACCO, Matang Tobacco">
+        <h1 class="visually-hidden">MBACCO</h1>
+        <p class="tagline">Stok tembakau, pembelian, dan penjualan toko Anda dalam satu catatan yang rapi.</p>
+    </div>
+    <div class="col-lg-5">
+        <div class="card login-card">
+            <div class="card-body p-4 p-lg-5">
+                <h2 class="h4 mb-4">Masuk ke akun Anda</h2>
                 <form method="POST" action="{{ route('login.attempt') }}">
                     @csrf
                     <div class="mb-3">
                         <label class="form-label" for="email">Email</label>
-                        <input type="email" id="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" required autofocus>
+                        <input type="email" id="email" name="email" value="{{ old('email') }}" class="form-control form-control-lg @error('email') is-invalid @enderror" required autofocus>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="password">Password</label>
-                        <input type="password" id="password" name="password" class="form-control" required>
+                        <input type="password" id="password" name="password" class="form-control form-control-lg" required>
                     </div>
-                    <div class="form-check mb-3">
+                    <div class="form-check mb-4">
                         <input class="form-check-input" type="checkbox" name="remember" id="remember">
                         <label class="form-check-label" for="remember">Ingat saya</label>
                     </div>
-                    <button class="btn btn-primary w-100">Masuk</button>
+                    <button class="btn btn-primary btn-lg w-100">Masuk</button>
                 </form>
-                <hr>
-                <small class="text-muted">Demo: admin@example.com / staff@example.com — password: <code>password123</code></small>
+                <hr class="my-4">
+                <small class="text-muted">Akun demo: admin@example.com atau staff@example.com, password <code>password123</code></small>
             </div>
         </div>
     </div>
