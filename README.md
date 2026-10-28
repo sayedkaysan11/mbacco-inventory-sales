@@ -4,18 +4,29 @@ Aplikasi manajemen stok dan penjualan berbasis **Laravel + MySQL** (UTS Web Prog
 
 ## 1. Project Overview
 Sistem untuk toko tembakau **MBACCO** (instagram.com/mbacco.id): mengelola kategori, produk, pemasok, pembelian (stock-in), dan penjualan.
-Stok berubah otomatis dan konsisten saat transaksi berhasil. Ada dua role: **Admin/Owner** dan **Staff**.
+Stok berubah otomatis dan konsisten saat transaksi berhasil. Ada tiga role: **Admin/Owner**, **Staff**, dan **Customer** (pembeli yang mendaftar sendiri dan memesan lewat toko online).
 
 ## 2. Requirements
 - PHP >= 8.2 (ekstensi: mbstring, xml, pdo_mysql, ctype, json)
 - Composer 2
-- MySQL / MariaDB
+- MySQL / MariaDB (XAMPP + phpMyAdmin)
 - Laravel 11 atau 12
 - Tidak perlu Node/npm: tampilan memakai Bootstrap 5 via CDN (butuh internet saat membuka halaman)
 
 ## 3. Installation
+
+### Cara cepat (clone repository ini)
+```bash
+git clone https://github.com/sayedkaysan11/mbacco-inventory-sales.git
+cd mbacco-inventory-sales
+composer install
+copy .env.example .env
+php artisan key:generate
+```
+(Di Linux/macOS gunakan `cp .env.example .env`.)
+
+### Cara alternatif (pasang di atas project Laravel baru)
 Repository ini berisi **lapisan aplikasi** (models, controllers, views, migrations, seeders, tests).
-Pasang di atas project Laravel baru:
 
 ```bash
 composer create-project laravel/laravel inventory-sales
@@ -35,7 +46,9 @@ DB_DATABASE=inventory_sales
 DB_USERNAME=root
 DB_PASSWORD=
 ```
-Buat database kosong `inventory_sales`, lalu pastikan `APP_KEY` terisi (`php artisan key:generate`).
+Nyalakan **Apache** dan **MySQL** di XAMPP, buat database kosong `inventory_sales` lewat phpMyAdmin, lalu pastikan `APP_KEY` terisi (`php artisan key:generate`).
+
+Zona waktu aplikasi diatur ke `Asia/Jakarta` (WIB) di `config/app.php`.
 
 ## 5. Migration & Seeding
 ```bash
@@ -45,27 +58,38 @@ php artisan serve
 Buka http://127.0.0.1:8000
 
 ## 6. Demo Account
-| Role  | Email             | Password      |
-|-------|-------------------|---------------|
-| Admin | admin@example.com | password123   |
-| Staff | staff@example.com | password123   |
+| Role     | Email             | Password    |
+|----------|-------------------|-------------|
+| Admin    | admin@example.com | password123 |
+| Staff    | staff@example.com | password123 |
+| Customer | kaysan@gmail.com  | 12345678    |
 
-(Akun fiktif untuk demo — bukan kredensial asli.)
+Customer juga bisa mendaftar sendiri lewat halaman `/register`.
+(Akun untuk demo, bukan kredensial asli.)
 
 ## 7. Features
-| Modul | Admin | Staff |
-|---|---|---|
-| Login / logout, password hash, route terlindungi | ✔ | ✔ |
-| Kategori, Pemasok (CRUD) | ✔ | ✘ |
-| Produk (CRUD) | ✔ | hanya lihat |
-| Pengguna & role | ✔ | ✘ |
-| Pembelian / stock-in (multi item) | ✔ semua | ✔ miliknya |
-| Penjualan (multi item) | ✔ semua | ✔ miliknya |
-| Pembatalan transaksi (stok dipulihkan) | ✔ | ✘ |
-| Dashboard (agregat dari DB), daftar stok rendah | ✔ | ✔ (angka miliknya) |
-| Search SKU/nama, filter kategori/tanggal/status, pagination | ✔ | ✔ |
+| Modul | Admin | Staff | Customer |
+|---|---|---|---|
+| Login / logout, password hash, route terlindungi | ✔ | ✔ | ✔ |
+| Daftar mandiri (`/register`) | - | - | ✔ |
+| Kategori, Pemasok (CRUD) | ✔ | ✘ | ✘ |
+| Produk (CRUD) | ✔ | hanya lihat | ✘ |
+| Pengguna & role | ✔ | ✘ | ✘ |
+| Pembelian / stock-in (multi item) | ✔ semua | ✔ miliknya | ✘ |
+| Penjualan (multi item) | ✔ semua | ✔ miliknya | ✘ |
+| Pembatalan transaksi (stok dipulihkan) | ✔ | ✘ | ✘ |
+| Dashboard (agregat dari DB), daftar stok rendah | ✔ | ✔ (angka miliknya) | dialihkan ke toko |
+| Toko: katalog, pesan barang, riwayat pesanan | ✘ | ✘ | ✔ |
+| Search SKU/nama, filter kategori/tanggal/status, pagination | ✔ | ✔ | ✔ (katalog) |
 
-Business rules yang diterapkan:
+### Fitur Customer (toko)
+- Daftar mandiri (`/register`); role selalu `customer`, tidak bisa dipilih dari form.
+- Melihat katalog produk **tanpa harga modal**.
+- Memesan barang: stok berkurang otomatis, pesanan ditolak bila stok tidak cukup.
+- Hanya bisa melihat pesanannya sendiri, dan tidak bisa membatalkan pesanan.
+- Membuka `/dashboard` otomatis dialihkan ke toko; halaman staff/admin ditolak (403).
+
+### Business rules yang diterapkan
 - SKU unik (validasi **dan** unique index database).
 - Kuantitas > 0, harga >= 0, divalidasi server.
 - Penjualan tidak boleh melebihi stok; stok hanya berubah setelah transaksi sukses.
@@ -76,6 +100,7 @@ Business rules yang diterapkan:
 - Pembatalan **pembelian** ditolak bila stok saat ini sudah lebih kecil dari kuantitas pembelian (stok tak boleh negatif).
 - Produk yang sudah dipakai transaksi tidak dapat dihapus; produk lain di-*soft delete*.
 - Kategori/pemasok/pengguna yang masih dipakai tidak dapat dihapus (FK `restrictOnDelete` + pengecekan).
+- Hak akses dicek di server lewat Gate (`admin`, `internal`, `customer`), bukan hanya dengan menyembunyikan menu.
 
 ## ERD
 ```mermaid
@@ -140,6 +165,7 @@ erDiagram
 - `hasMany` ada di sisi "satu" (Category → banyak Product); `belongsTo` di sisi "banyak" (Product → satu Category).
 - **Foreign key berada di tabel detail/anak** (`products.category_id`, `sale_items.sale_id`) karena satu baris induk dipakai banyak baris anak; menyimpan banyak id di induk melanggar normalisasi.
 - Daftar produk memakai `Product::with('category')` untuk menghindari N+1 query.
+- Pesanan customer disimpan sebagai `Sale` yang dimiliki user dengan role customer (`sales.user_id`).
 
 ## Fitur tambahan: Laporan Laba & Estimasi Stok
 - **Laporan laba** (`/reports`, khusus admin): omzet, modal, laba kotor, margin, laba per hari, produk paling menguntungkan, filter tanggal, dan ekspor CSV.
@@ -151,8 +177,9 @@ erDiagram
 
 ## 8. Known Limitations
 - Penomoran transaksi memakai kode acak unik (bukan urut).
-- Tidak ada laporan ekspor (PDF/Excel).
+- Tidak ada laporan ekspor PDF/Excel (hanya CSV).
 - Tidak ada pengembalian sebagian (partial return); hanya pembatalan penuh.
+- Pesanan customer langsung selesai dan mengurangi stok; belum ada alur status (pending, dibayar, dikirim) maupun pencatatan metode pembayaran.
 - Bootstrap dimuat via CDN sehingga perlu koneksi internet.
 - Belum diuji beban pada transaksi paralel sungguhan (mekanisme `lockForUpdate` dijelaskan di bawah).
 
@@ -162,7 +189,7 @@ erDiagram
 ```bash
 php artisan test
 ```
-Test memakai database SQLite in-memory bawaan `phpunit.xml` Laravel 11/12 (tidak menyentuh MySQL).
+Test memakai database SQLite in-memory bawaan `phpunit.xml` Laravel 11/12 (tidak menyentuh MySQL). Total: **45 test lulus**.
 
 | Skenario (slide UTS) | Test |
 |---|---|
@@ -176,8 +203,7 @@ Test memakai database SQLite in-memory bawaan `phpunit.xml` Laravel 11/12 (tidak
 | Filter & pagination | `SearchTest` |
 | Laporan laba, snapshot modal, filter tanggal, CSV, akses admin | `ReportTest` |
 | Estimasi stok habis dan saran beli | `StockForecastTest` |
-
-> Tempel output `php artisan test` dan screenshot halaman di folder `docs/` sebagai bukti pengujian.
+| Customer: register (role tidak bisa dipilih), akses dibatasi, tidak melihat harga modal, order mengurangi stok, stok kurang ditolak, tidak bisa lihat order orang lain, tidak bisa membatalkan | `CustomerTest` |
 
 ## Catatan untuk Code Ownership Interview
 | Pertanyaan | Jawaban singkat & lokasi kode |
@@ -190,19 +216,25 @@ Test memakai database SQLite in-memory bawaan `phpunit.xml` Laravel 11/12 (tidak
 | Dua penjualan hampir bersamaan pada produk yang sama? | `lockForUpdate()` mengunci baris produk; transaksi kedua menunggu lalu membaca stok terbaru. |
 | SKU unik & peran constraint DB? | `Rule::unique` memberi pesan ramah; unique index di migration melindungi dari race condition. |
 | Ubah aturan minimum stock? | Definisi "rendah" ada di `Product::isLowStock()` dan `whereColumn('stock','<=','minimum_stock')` (Dashboard & `lowStock`). |
+| Bagaimana customer dicegah membuka halaman staff/admin? | Route staff/admin dibungkus `can:internal`, route toko dibungkus `can:customer` (Gate di `AppServiceProvider`), jadi dicek di server. `routes/web.php` |
+| Mengapa role tidak boleh dipilih di form register? | Kalau role dikirim dari browser, orang bisa mendaftar sebagai admin. Role diisi `customer` oleh server di `RegisterController`. |
+| Mengapa customer tidak boleh melihat harga modal? | Harga modal adalah data internal toko (menentukan laba). View toko hanya menampilkan harga jual. `ShopController` dan `resources/views/shop/` |
+| Mengapa customer di `/dashboard` dialihkan? | `DashboardController::index` mengecek `can('customer')` lalu `redirect()->route('shop.index')`, karena dashboard berisi data internal. |
 
 ## Struktur kode
 ```
-app/Models                  8 model + relasi Eloquent
-app/Http/Controllers        Auth, Dashboard, Category, Supplier, Product, Purchase, Sale, User, Report, StockForecast
+app/Models                  model + relasi Eloquent
+app/Http/Controllers        Auth, Register, Dashboard, Category, Supplier, Product, Purchase, Sale, User, Report, StockForecast, Shop
 app/Services                SaleService, PurchaseService  (business logic transaksi)
-app/Providers               AppServiceProvider (Gate 'admin', pagination Bootstrap)
+app/Providers               AppServiceProvider (Gate 'admin', 'internal', 'customer', pagination Bootstrap)
 database/migrations         skema + FK + index
 database/seeders            kategori, produk, pemasok, akun demo
-routes/web.php              named routes + middleware auth / can:admin
-resources/views             layout reusable + halaman Blade
-tests/Feature               test scenario minimum
-```## Screenshot
+routes/web.php              named routes + middleware auth / can:admin / can:internal / can:customer
+resources/views             layout reusable + halaman Blade (termasuk shop/ dan auth/register)
+tests/Feature               test scenario (45 test)
+```
+
+## Screenshot
 
 ### Dashboard
 ![Dashboard](docs/dashboard.png)
@@ -218,4 +250,4 @@ Staff yang membuka halaman admin lewat URL langsung mendapat 403.
 
 ### Hasil pengujian
 ![Hasil test](docs/hasiltest.png)
-Hasil `php artisan test`: 36 test lulus.
+Hasil `php artisan test`: 45 test lulus.
