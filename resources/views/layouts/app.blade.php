@@ -23,6 +23,15 @@
         </button>
         <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav me-auto">
+                {{-- Menu PEMBELI --}}
+                @can('customer')
+                    <li class="nav-item"><a class="nav-link{{ $on('shop.index') }}" href="{{ route('shop.index') }}">Katalog</a></li>
+                    <li class="nav-item"><a class="nav-link{{ $on('shop.order.*') }}" href="{{ route('shop.order.create') }}">Pesan</a></li>
+                    <li class="nav-item"><a class="nav-link{{ $on('shop.orders.*') }}" href="{{ route('shop.orders.index') }}">Pesanan Saya</a></li>
+                @endcan
+
+                {{-- Menu ADMIN & STAFF --}}
+                @can('internal')
                 <li class="nav-item"><a class="nav-link{{ $on('dashboard') }}" href="{{ route('dashboard') }}">Dashboard</a></li>
 
                 <li class="nav-item dropdown">
@@ -56,6 +65,7 @@
                     @if (Route::has('reports.index'))
                         <li class="nav-item"><a class="nav-link{{ $on('reports.*') }}" href="{{ route('reports.index') }}">Laporan</a></li>
                     @endif
+                @endcan
                 @endcan
             </ul>
 

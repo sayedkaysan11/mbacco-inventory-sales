@@ -21,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Gate dipakai oleh middleware "can:admin" di routes/web.php
         // dan oleh @can('admin') di Blade. Otorisasi sebenarnya ada di SERVER (route + Form Request).
-        Gate::define('admin', fn (User $user) => $user->isAdmin());
+                Gate::define('admin', fn (User $user) => $user->isAdmin());
+        Gate::define('internal', fn (User $user) => in_array($user->role, ['admin', 'staff'], true));
+        Gate::define('customer', fn (User $user) => $user->role === 'customer');
     }
 }

@@ -26,8 +26,7 @@
                         <label class="form-check-label" for="remember">Ingat saya</label>
                     </div>
                     <button class="btn btn-primary btn-lg w-100">Masuk</button>
-                </form>
-                <hr class="my-4">
+                </form><p class="mt-3 mb-0 text-center">Belum punya akun? <a href="{{ route('register') }}">Daftar sebagai pembeli</a></p>
                 <small class="text-muted">Akun demo: admin@example.com atau staff@example.com, password <code>password123</code></small>
             </div>
         </div>

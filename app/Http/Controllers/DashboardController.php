@@ -13,6 +13,11 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
+        // Pembeli dialihkan ke katalog toko
+        if ($user->can('customer')) {
+            return redirect()->route('shop.index');
+        }
+
         // Staff hanya melihat angka transaksinya sendiri; admin melihat semuanya.
         $sales = fn () => Sale::where('status', 'completed')
             ->when(! $user->isAdmin(), fn ($q) => $q->where('user_id', $user->id));
